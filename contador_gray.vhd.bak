@@ -1,0 +1,70 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity contador is
+	generic(
+	 N: integer:=4);
+	port(
+		reset: in std_logic;
+		enable: in std_logic;
+		counter: in std_logic;
+		m1, m2, s1, s2: out std_logic_vector(N-1 downto 0)
+		);
+end contador;
+
+architecture arch of contador is
+	signal m1_reg, m2_reg, s1_reg, s2_reg: unsigned(N-1 downto 0);
+	signal m1_next, m2_next, s1_next, s2_next: unsigned(N-1 downto 0);	
+begin
+	process(counter)
+	begin
+		if (reset = '1') then
+			m1_reg <= (others=>'0');
+			m2_reg <= (others=>'0');
+			s1_reg <= (others=>'0');
+			s2_reg <= (others=>'0');
+			
+		elsif (counter'event and counter='1') then
+			if (enable = '1') then
+			
+				if (s2_reg = 9) then
+					s2_reg <= (others=>'0');
+					s1_reg <= s1_next;
+				else
+					s2_reg <= s2_next;
+				end if;
+				
+				if(s1_reg = 5 and s2_reg = 9) then
+					s1_reg <= (others=>'0');
+					m2_reg <= m2_next;
+				end if;
+				
+				if(m2_reg = 10) then
+					m2_reg <= (others=>'0');
+					m1_reg <= m1_next;					
+				end if;
+				
+				if(m1_reg = 5 and m2_reg = 9) then
+					m1_reg <= (others=>'0');
+					m2_reg <= (others=>'0');
+					s1_reg <= (others=>'0');
+					s2_reg <= (others=>'0');
+				end if;
+				
+			end if;
+		end if;
+	end process;
+	
+	--next state logic
+	m1_next <= m1_reg + 1;
+	m2_next <= m2_reg + 1;
+	s1_next <= s1_reg + 1;
+	s2_next <= s2_reg + 1;
+	
+	-- output
+	s2 <= std_logic_vector(s2_reg);
+	s1 <= std_logic_vector(s1_reg);
+	m2 <= std_logic_vector(m2_reg);
+	m1 <= std_logic_vector(m1_reg);
+end arch;
